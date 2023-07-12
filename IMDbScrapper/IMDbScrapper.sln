@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33815.320
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IMDbScrapper", "IMDbScrapper.csproj", "{DDCE1CAD-2723-4516-8BB7-3FEFDDBD878D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DDCE1CAD-2723-4516-8BB7-3FEFDDBD878D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDCE1CAD-2723-4516-8BB7-3FEFDDBD878D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDCE1CAD-2723-4516-8BB7-3FEFDDBD878D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDCE1CAD-2723-4516-8BB7-3FEFDDBD878D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FC88DDE4-8F3E-4DD7-AF33-47FEF5F904C0}
+	EndGlobalSection
+EndGlobal
