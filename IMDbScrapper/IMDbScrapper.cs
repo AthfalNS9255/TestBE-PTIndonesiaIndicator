@@ -167,28 +167,28 @@ namespace IMDbScrapper
 				}
 
 				Step = 3; // untuk ambil Nama film
-				var xName = await xCard.XPathAsync("//h1");
+				var xName = await xCard.XPathAsync(".//h1");
 				if (xName.Length > 0)
 				{
 					data.Name = await xName[0].EvaluateFunctionAsync<string>("e => e.innerText", xName[0]);
 				}
 
 				Step = 4; // untuk ambil Nama Pemasang
-				var xYear = await xCard.XPathAsync("//a[contains(@href, 'release')]");
+				var xYear = await xCard.XPathAsync(".//a[contains(@href, 'release')]");
 				if (xYear.Length > 0)
 				{
 					data.Year = await xYear[0].EvaluateFunctionAsync<int>("e => e.innerText", xYear[0]);
 				}
 
 				Step = 5; // ambil rating film
-				var xRating = await xCard.XPathAsync("//div[contains(@data-testid, 'rating')]/span");
+				var xRating = await xCard.XPathAsync(".//div[contains(@data-testid, 'rating')]/span");
 				if (xRating.Length > 0)
 				{
 					data.Rating = await xRating[0].EvaluateFunctionAsync<double>("e => e.innerText", xRating[0]);
 				}
 
 				Step = 6; // ambil duration film
-				var xDuration = await xCard.XPathAsync("//h1[contains(@data-testid, 'pageTitle')]/following-sibling::ul/li[3]");
+				var xDuration = await xCard.XPathAsync(".//h1[contains(@data-testid, 'pageTitle')]/following-sibling::ul/li[3]");
 				if (xDuration.Length > 0)
 				{
 					data.Duration = await xDuration[0].EvaluateFunctionAsync<string>("e => e.innerText", xDuration[0]);
@@ -198,14 +198,23 @@ namespace IMDbScrapper
 				data.Image = $"{data.Url}mediaviewer/";
 
 				Step = 8; // ambil director film
-				var xDirector = await xCard.XPathAsync("//*[text()='Director']/following-sibling::div//a");
-				if (xDirector.Length > 0)
+				var xLDirectors = await xCard.XPathAsync("//*[contains(text(), 'Director')]/following-sibling::div");
+				if (xLDirectors.Length > 0)
 				{
-					data.Director = await xDirector[0].EvaluateFunctionAsync<string>("e => e.innerText", xDirector[0]);
+					List<string> Directors = new List<string>();
+					var xDirectors = await xLDirectors[0].XPathAsync(".//a");
+
+					foreach (var item in xDirectors)
+					{
+						string Director = await item.EvaluateFunctionAsync<string>("e => e.innerText", item);
+						Directors.Add(Director);
+					}
+
+					data.Directors = string.Join(", ", Directors);
 				}
 
 				Step = 9; // ambil writers film
-				var xLWriters = await xCard.XPathAsync("//*[text()='Writers']/following-sibling::div/ul");
+				var xLWriters = await xCard.XPathAsync(".//*[contains(text(), 'Writer')]/following-sibling::div");
 				if (xLWriters.Length > 0)
 				{
 					List<string> Writers = new List<string>();
@@ -221,7 +230,7 @@ namespace IMDbScrapper
 				}
 
 				Step = 10; // ambil stars film
-				var xLStars = await xCard.XPathAsync("//*[text()='Stars']/following-sibling::div/ul");
+				var xLStars = await xCard.XPathAsync(".//*[contains(text(), 'Star')]/following-sibling::div");
 				if (xLStars.Length > 0)
 				{
 					List<string> Stars = new List<string>();
@@ -237,14 +246,14 @@ namespace IMDbScrapper
 				}
 
 				Step = 11; // ambil plot film
-				var xPlot = await xCard.XPathAsync("//p[@data-testid='plot']");
+				var xPlot = await xCard.XPathAsync(".//p[@data-testid='plot']");
 				if (xPlot.Length > 0)
 				{
 					data.Plot = await xPlot[0].EvaluateFunctionAsync<string>("e => e.innerText", xPlot[0]);
 				}
 
 				Step = 12; // ambil Genre film
-				var xGenres = await xCard.XPathAsync("//div[@data-testid='genres']//a");
+				var xGenres = await xCard.XPathAsync(".//div[@data-testid='genres']//a");
 				if (xGenres.Length > 0)
 				{
 					List<string> Genres = new List<string>();
@@ -270,7 +279,7 @@ namespace IMDbScrapper
 					Console.WriteLine($"  - Rating     : {data.Rating} / 10");
 					Console.WriteLine($"  - Duration   : {data.Duration}");
 					Console.WriteLine($"  - Image      : {data.Image}");
-					Console.WriteLine($"  - Director   : {data.Director}");
+					Console.WriteLine($"  - Directors  : {data.Directors}");
 					Console.WriteLine($"  - Writers    : {data.Writers}");
 					Console.WriteLine($"  - Stars      : {data.Stars}");
 
@@ -291,8 +300,8 @@ namespace IMDbScrapper
 				Step = 1;
 				MySqlConnection connection = new MySqlConnection("Server=localhost; Database=imdbscrapper; Uid=root; Pwd=root;");
 				MySqlCommand insertCommand = new MySqlCommand("Insert into movie " +
-					"(Url, Name, Year, Rating, Duration, Image, Director, Writers, Stars, Plot, Genre) values " +
-					"(@Url, @Name, @Year, @Rating, @Duration, @Image, @Director, @Writers, @Stars, @Plot, @Genre)", connection);
+					"(Url, Name, Year, Rating, Duration, Image, Directors, Writers, Stars, Plot, Genre) values " +
+					"(@Url, @Name, @Year, @Rating, @Duration, @Image, @Directors, @Writers, @Stars, @Plot, @Genre)", connection);
 
 				Step = 2;
 				connection.Open();
@@ -304,7 +313,7 @@ namespace IMDbScrapper
 				insertCommand.Parameters.AddWithValue("@Rating", data.Rating);
 				insertCommand.Parameters.AddWithValue("@Duration", data.Duration);
 				insertCommand.Parameters.AddWithValue("@Image", data.Image);
-				insertCommand.Parameters.AddWithValue("@Director", data.Director);
+				insertCommand.Parameters.AddWithValue("@Directors", data.Directors);
 				insertCommand.Parameters.AddWithValue("@Writers", data.Writers);
 				insertCommand.Parameters.AddWithValue("@Stars", data.Stars);
 				insertCommand.Parameters.AddWithValue("@Plot", data.Plot);
