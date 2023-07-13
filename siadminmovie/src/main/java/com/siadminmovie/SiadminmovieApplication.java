@@ -1,13 +1,13 @@
-package com.admin.movie.siadminmovie;
+package com.siadminmovie;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SiAdminMovieApplication {
+public class SiadminmovieApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SiAdminMovieApplication.class, args);
+		SpringApplication.run(SiadminmovieApplication.class, args);
 	}
 
 }

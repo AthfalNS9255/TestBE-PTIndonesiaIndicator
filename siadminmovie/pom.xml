@@ -8,11 +8,11 @@
 		<version>3.1.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.admin.movie</groupId>
-	<artifactId>si-admin-movie</artifactId>
+	<groupId>com</groupId>
+	<artifactId>siadminmovie</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>si-admin-movie</name>
-	<description>Demo project for Spring Boot</description>
+	<name>siadminmovie</name>
+	<description>SiAdminMovie</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
