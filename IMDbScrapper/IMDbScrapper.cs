@@ -41,8 +41,11 @@ namespace IMDbScrapper
 				Step = 4; // ambil detail
 				foreach (var data in Results)
 				{
-					var tunggu = new RandomGenerator().RandomNumber(2, 5);
-					await Task.Delay(tunggu * 1000);
+					if (Program.Cancelled)
+						break;
+
+					//var tunggu = new RandomGenerator().RandomNumber(2, 5);
+					//await Task.Delay(tunggu * 1000);
 					await GetDetail(data);
 				}
 			}
@@ -76,6 +79,8 @@ namespace IMDbScrapper
 
 				Step = 2; // Load web
 				await page.GoToAsync(UrlTarget, navigation);
+
+				await Task.Delay(10000);
 
 				Step = 3; // Pastikan div listings ada
 				var listings = await page.WaitForXPathAsync("//tbody[@class='lister-list']");
@@ -122,6 +127,9 @@ namespace IMDbScrapper
 							Console.WriteLine($"List Ke {data.DataKe} = {data.Url}\n");
 							Results.Add(data);
 
+							if (Program.Cancelled)
+								break;
+							
 						}
 					}
 				}
@@ -140,6 +148,7 @@ namespace IMDbScrapper
 			int Step = 0;
 			try
 			{
+				
 				Console.WriteLine($"Get detail : {data.DataKe}");
 
 				var navigation = new NavigationOptions
@@ -285,6 +294,8 @@ namespace IMDbScrapper
 
 					SaveToDatabase(data);
 				}
+
+				
 			}
 			catch (Exception ex)
 			{
