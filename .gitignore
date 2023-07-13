@@ -4,3 +4,10 @@
 
 /IMDbScrapper/bin
 /.vs
+*.vsidx
+/IMDbScrapper/.vs/IMDbScrapper/v17/.suo
+/IMDbScrapper/.vs/IMDbScrapper/FileContentIndex/a26bebcb-ab6d-4474-9338-dd67fb8ddafa.vsidx
+/IMDbScrapper/.vs/IMDbScrapper/FileContentIndex/1341d040-eb73-49ad-bdda-c7a47ce2b3a9.vsidx
+/IMDbScrapper/.vs/IMDbScrapper/FileContentIndex/043eb3bd-d259-4583-aa10-944e8ff92c21.vsidx
+/IMDbScrapper/obj/Debug/IMDbScrapper.exe
+/IMDbScrapper/obj/Debug/IMDbScrapper.pdb
