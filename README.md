@@ -13,3 +13,5 @@ Fitur :
 - CRUD Movie
 - Pagination
 - Sorting
+- Searching
+- Items per Page
