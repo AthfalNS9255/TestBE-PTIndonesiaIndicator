@@ -11,5 +11,6 @@ public interface MovieService {
 	void saveMovie(Movie movie);
 	Movie getMovieById(int id);
 	void deleteMovieById(int id);
-	Page<Movie> findPaginated(int pageNo, int pageSize, String sortField, String sortDirection);
+	Page<Movie> findMovies(int pageNo, int pageSize, String sortField, 
+		String sortDirection, String keyword);
 }

@@ -11,10 +11,12 @@
 </head>
 
 <body>
+
+	<div th:replace="~{fragments/header :: header}"></div>
+
 	<div class="container my-2">
-		<h1>SiAdminMovie - Movie Management System</h1>
+		<h2 class="text-primary">Update Movie</h2>
 		<hr>
-		<h2>Update Movie</h2>
 
 		<form class="row g-3" action="#" th:action="@{/saveMovie}" th:object="${movie}" method="POST">
 
@@ -78,6 +80,8 @@
 		<hr>
 
 		<a href="/"> Back to Movie List</a>
+
+		<div th:replace="~{fragments/footer :: footer}"></div>
 	</div>
 </body>
 

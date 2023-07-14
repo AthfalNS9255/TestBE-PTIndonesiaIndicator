@@ -46,7 +46,9 @@ public class MovieServiceImpl implements MovieService{
 	}
 
 	@Override
-	public Page<Movie> findPaginated(int pageNo, int pageSize, String sortField, String sortDirection) {
+	public Page<Movie> findMovies(int pageNo, int pageSize, String sortField, 
+		String sortDirection, String keyword) {
+
 		Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortField).ascending() :
 			Sort.by(sortField).descending();
 
@@ -54,6 +56,13 @@ public class MovieServiceImpl implements MovieService{
 		// 	Sort.Direction.DESC;
 
 		Pageable pageable = PageRequest.of(pageNo - 1, pageSize, sort);
-		return this.movieRepository.findAll(pageable);
+		
+		Page<Movie> page = keyword != "" && keyword != null ? 
+			this.movieRepository.findByNameContainingIgnoreCase(keyword, pageable) :
+			this.movieRepository.findAll(pageable);
+		return page;
 	}
+
+
+	
 }

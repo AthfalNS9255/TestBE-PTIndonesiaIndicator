@@ -10,10 +10,12 @@
 </head>
 
 <body>
+
+	<div th:replace="~{fragments/header :: header}"></div>
+
 	<div class="container my-2">
-		<h1>SiAdminMovie - Movie Management System</h1>
+		<h2 class="text-primary">Save Movie</h2>
 		<hr>
-		<h2>Save Movie</h2>
 
 		<form class="row g-3" action="#" th:action="@{/saveMovie}" th:object="${movie}" method="POST">
 
@@ -66,14 +68,15 @@
 				<textarea class="form-control" th:field="*{plot}" id="inputPlot" rows="2" required></textarea>
 			</div>
 			
-			<div class="col-12">
-				<button type="submit" class="btn btn-primary col-2"> Save Movie</button>
+			<div class="col-10">
+				<button type="submit" class="btn btn-primary col-3"> Save Movie</button>
+				<a href="/" class="btn btn-secondary col-2">Close</a>
 			</div>
 		</form>
 
 		<hr>
 
-		<a href="/"> Back to Movie List</a>
+		<div th:replace="~{fragments/footer :: footer}"></div>
 	</div>
 </body>
 

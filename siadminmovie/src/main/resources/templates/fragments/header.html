@@ -1,0 +1,19 @@
+<header th:fragment="header">
+    <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">SiAdminMovie</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNavbar"
+                aria-controls="topNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="topNavbar">
+                <div class="navbar-nav">
+                    <a class="nav-link" href="/" 
+                        th:classappend="${#ctx.springRequestContext.requestUri} == '/' ? 'active'">Home</a>
+                    <a class="nav-link" th:href="@{/showNewMovieForm}" 
+                        th:classappend="${#ctx.springRequestContext.requestUri} == '/showNewMovieForm' ? 'active'">Add</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>

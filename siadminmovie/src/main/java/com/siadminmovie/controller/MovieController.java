@@ -17,15 +17,15 @@ import com.siadminmovie.service.MovieService;
 
 @Controller
 public class MovieController {
-    @Autowired
+	@Autowired
 	private MovieService movieService;
-	
+
 	// display list of movies
 	@GetMapping("/")
 	public String viewHomePage(Model model) {
-		return findPaginated(1, "id", "asc", model);		
+		return findPaginated(1, "id", "asc", "", 10, model);
 	}
-	
+
 	@GetMapping("/showNewMovieForm")
 	public String showNewMovieForm(Model model) {
 		// create model attribute to bind form data
@@ -33,51 +33,57 @@ public class MovieController {
 		model.addAttribute("movie", movie);
 		return "new_movie";
 	}
-	
+
 	@PostMapping("/saveMovie")
 	public String saveMovie(@ModelAttribute("movie") Movie movie) {
 		// save movie to database
 		movieService.saveMovie(movie);
 		return "redirect:/";
 	}
-	
+
 	@GetMapping("/showFormForUpdate/{id}")
-	public String showFormForUpdate(@PathVariable ( value = "id") int id, Model model) {
-		
+	public String showFormForUpdate(@PathVariable(value = "id") int id, Model model) {
+
 		// get movie from the service
 		Movie movie = movieService.getMovieById(id);
-		
+
 		// set movie as a model attribute to pre-populate the form
 		model.addAttribute("movie", movie);
 		return "update_movie";
 	}
-	
+
 	@GetMapping("/deleteMovie/{id}")
-	public String deleteMovie(@PathVariable (value = "id") int id) {
-		
-		// call delete movie method 
+	public String deleteMovie(@PathVariable(value = "id") int id) {
+
+		// call delete movie method
 		this.movieService.deleteMovieById(id);
 		return "redirect:/";
 	}
-	
+
 	@GetMapping("/page/{pageNo}")
-	public String findPaginated(@PathVariable (value = "pageNo") int pageNo, 
+	public String findPaginated(
+			@PathVariable(value = "pageNo") int pageNo,
 			@RequestParam("sortField") String sortField,
 			@RequestParam("sortDir") String sortDir,
+			@RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
+			@RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
 			Model model) {
-		int pageSize = 10;
+
 		
-		Page<Movie> page = movieService.findPaginated(pageNo, pageSize, sortField, sortDir);
+		Page<Movie> page = movieService.findMovies(pageNo, pageSize, sortField, sortDir, keyword);
 		List<Movie> listMovies = page.getContent();
-		
+
 		model.addAttribute("currentPage", pageNo);
 		model.addAttribute("totalPages", page.getTotalPages());
 		model.addAttribute("totalItems", page.getTotalElements());
+		model.addAttribute("pageSize", pageSize);
+
+		model.addAttribute("keyword", keyword);
 		
 		model.addAttribute("sortField", sortField);
 		model.addAttribute("sortDir", sortDir);
 		model.addAttribute("reverseSortDir", sortDir.equals("asc") ? "desc" : "asc");
-		
+
 		model.addAttribute("listMovies", listMovies);
 		return "index";
 	}

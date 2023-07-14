@@ -5,113 +5,195 @@
 	<meta charset="ISO-8859-1">
 	<title>SiAdminMovie</title>
 
+	<script type="text/javascript" th:src="@{/webjars/jquery/jquery.min.js}"></script>
+	<script type="text/javascript" th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+	<link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" />
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
 		integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+
 
 </head>
 
 <body>
 
+	<div th:replace="~{fragments/header :: header}"></div>
+
+
+
 	<div class="container my-2">
-		<h1>SiAdminMovie - Movie Management System</h1>
+		<h2 class="text-primary">Movie List</h2>
+		<hr>
 
-		<a th:href="@{/showNewMovieForm}" class="btn btn-primary btn-sm mb-3"> Add Movie </a>
+		<div th:if="${listMovies.size() > 0}">
 
-		<table border="1" class="table table-striped table-responsive-sm table-hover table-sm">
-			<thead>
+			<div class="my-3">
+				<form
+					th:action="@{'/page/' + ${currentPage}+'?pageSize='+${pageSize}+'sortField='+${sortField}+'&sortDir='+${sortDir}+'&keyword='+${keyword}}"
+					id="searchForm">
+					<div class="row g-2">
+						<div class="col-md-6">
+							<input type="text" name="currentPage" hidden th:value="${currentPage}">
+							<input type="text" name="sortField" hidden th:value="${sortField}">
+							<input type="text" name="sortDir" hidden th:value="${sortDir}">
+							<div class="input-group">
+								<input name="keyword" type="search" th:value="${keyword}" required class="form-control"
+									placeholder="Search by Name...">
+								<button type="submit" class="btn btn-secondary">Search</button>
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="input-group">
+								<label class="input-group-text" for="pageSize">Items per page:</label>
+								<select form="searchForm" id="pageSize" name="pageSize" th:value="${pageSize}"
+									onchange="changePageSize()" class="form-select">
+									<option th:each="s : ${#numbers.sequence(5, 30, 5)}" th:value="${s}" th:text="${s}"
+										th:selected="${s == pageSize}"></option>
+								</select>
+							</div>
+						</div>
+						<div class="col-md-1">
+							<button id="btnClear" class="btn btn-info">Clear</button>
+						</div>
+					</div>
+				</form>
+			</div>
+
+			<table border="1" class="table table-striped table-responsive-sm table-hover table-md" <thead>
 				<tr>
 					<th>
-						<a th:href="@{'/page/' + ${currentPage} + '?sortField=id&sortDir=' + ${reverseSortDir}}">
+						<a
+							th:href="@{'/page/' + ${currentPage}+'?pageSize='+${pageSize}+'&sortField=id&sortDir='+${reverseSortDir}+'&keyword='+${keyword}}">
 							ID</a>
 					</th>
 					<th>
-						<a th:href="@{'/page/' + ${currentPage} + '?sortField=name&sortDir=' + ${reverseSortDir}}">
+						<a
+							th:href="@{'/page/' + ${currentPage}+'?pageSize='+${pageSize}+'&sortField=name&sortDir='+${reverseSortDir}+'&keyword='+${keyword}}">
 							Name</a>
 					</th>
 					<th>
-						<a th:href="@{'/page/' + ${currentPage} + '?sortField=year&sortDir=' + ${reverseSortDir}}">
+						<a
+							th:href="@{'/page/' + ${currentPage}+'?pageSize='+${pageSize}+'&sortField=year&sortDir='+${reverseSortDir}+'&keyword='+${keyword}}">
 							Year</a>
 					</th>
 					<th>
-						<a th:href="@{'/page/' + ${currentPage} + '?sortField=rating&sortDir=' + ${reverseSortDir}}">
+						<a
+							th:href="@{'/page/' + ${currentPage}+'?pageSize='+${pageSize}+'&sortField=rating&sortDir='+${reverseSortDir}+'&keyword='+${keyword}}">
 							Rating</a>
 					</th>
 					<th>
-						<a th:href="@{'/page/' + ${currentPage} + '?sortField=duration&sortDir=' + ${reverseSortDir}}">
-							Duration</a>
+						<a
+							th:href="@{'/page/' + ${currentPage}+'?pageSize='+${pageSize}+'&sortField=duration&sortDir='+${reverseSortDir}+'&keyword='+${keyword}}">
+							Duration(min)</a>
 					</th>
 					<th>
-						<a th:href="@{'/page/' + ${currentPage} + '?sortField=genre&sortDir=' + ${reverseSortDir}}">
+						<a
+							th:href="@{'/page/' + ${currentPage}+'?pageSize='+${pageSize}+'&sortField=genre&sortDir='+${reverseSortDir}+'&keyword='+${keyword}}">
 							Genre</a>
 					</th>
-					<th class="w-auto"> Actions </th>
+					<th class="col-2"> Actions </th>
 				</tr>
-			</thead>
-			<tbody class="table-group-divider">
-				<tr th:each="movie : ${listMovies}">
-					<td th:text="${movie.id}"></td>
-					<td th:text="${movie.name}"></td>
-					<td th:text="${movie.year}"></td>
-					<td th:text="${movie.rating}"></td>
-					<td th:text="${movie.duration}"></td>
-					<td th:text="${movie.genre}"></td>
-					<td> <a th:href="@{/showFormForUpdate/{id}(id=${movie.id})}"
-							class="btn btn-primary btn-sm">Update</a>
-						<a th:attr="data-bs-target=${'#deleteModal'+movie.id}" class="btn btn-danger btn-sm"
-							data-bs-toggle="modal">Delete</a>
-						<div class="modal fade" th:attr="id=${'deleteModal'+movie.id},aria-labelledby=${'deleteModalLabel'+movie.id}" 
-							data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true" >
-							<div class="modal-dialog">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h1 class="modal-title fs-5" th:attr="id=${'deleteModalLabel'+movie.id}">Delete Movie</h1>
-										<button type="button" class="btn-close" data-bs-dismiss="modal"
-											aria-label="Close"></button>
-									</div>
-									<div class="modal-body">
-										<p>Are you sure to delete this movie?</p>
-									</div>
-									<div class="modal-footer">
-										<button type="button" class="btn btn-secondary"
-											data-bs-dismiss="modal">Close</button>
-										<a th:href="@{/deleteMovie/{id}(id=${movie.id})}"
-											class="btn btn-primary">Delete</a>
+				</thead>
+				<tbody class="">
+					<tr th:each="movie : ${listMovies}">
+						<th th:text="${movie.id}" scope="row"></th>
+						<td th:text="${movie.name}"></td>
+						<td th:text="${movie.year}"></td>
+						<td th:text="${movie.rating}"></td>
+						<td th:text="${movie.duration}"></td>
+						<td th:text="${movie.genre}"></td>
+						<td> <a th:href="@{/showFormForUpdate/{id}(id=${movie.id})}"
+								class="btn btn-primary btn-sm">Update</a>
+							<a th:attr="data-bs-target=${'#deleteModal'+movie.id}" class="btn btn-danger btn-sm"
+								data-bs-toggle="modal">Delete</a>
+							<div class="modal fade"
+								th:attr="id=${'deleteModal'+movie.id},aria-labelledby=${'deleteModalLabel'+movie.id}"
+								data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+								<div class="modal-dialog">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h1 class="modal-title fs-5" th:attr="id=${'deleteModalLabel'+movie.id}">
+												Delete Movie</h1>
+											<button type="button" class="btn-close" data-bs-dismiss="modal"
+												aria-label="Close"></button>
+										</div>
+										<div class="modal-body">
+											<p>Are you sure to delete this movie?</p>
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary"
+												data-bs-dismiss="modal">Close</button>
+											<a th:href="@{/deleteMovie/{id}(id=${movie.id})}"
+												class="btn btn-danger">Delete</a>
+										</div>
 									</div>
 								</div>
 							</div>
-						</div>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-
-		<div th:if="${totalPages > 1}">
-			<div class="row">
-				<div class="col-2">
-					Total Rows: [[${totalItems}]]
-				</div>
-				<div class="col">
-					<span th:each="i: ${#numbers.sequence(1, totalPages)}">
-						<a th:if="${currentPage != i}"
-							th:href="@{'/page/' + ${i}+ '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}}">[[${i}]]</a>
-						<span th:unless="${currentPage != i}">[[${i}]]</span> &nbsp; &nbsp;
-					</span>
-				</div>
-				<div class="col-1">
-					<a th:if="${currentPage < totalPages}"
-						th:href="@{'/page/' + ${currentPage + 1}+ '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}}">Next</a>
-					<span th:unless="${currentPage < totalPages}">Next</span>
-				</div>
-
-				<div class="col-1">
-					<a th:if="${currentPage < totalPages}"
-						th:href="@{'/page/' + ${totalPages}+ '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}}">Last</a>
-					<span th:unless="${currentPage < totalPages}">Last</span>
-				</div>
-			</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
 		</div>
+
+		<div th:unless="${listMovies.size() > 0}">
+			<span>No tutorials found!</span>
+		</div>
+
+
+		<nav aria-label="Pagination" th:if="${totalPages > 0}">
+			<ul class="pagination justify-content-center">
+				<li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+					<a
+						th:replace="~{fragments/paging :: paging(1, ${pageSize}, ${sortField}, ${sortDir}, ${keyword}, '<<', 'First Page')}"></a>
+				</li>
+				<li class="page-item font-weight-bold" th:classappend="${currentPage == 1} ? 'disabled'">
+					<a
+						th:replace="~{fragments/paging :: paging(${currentPage - 1}, ${pageSize}, ${sortField}, ${sortDir}, ${keyword}, 'Prev', 'Previous Page')}"></a>
+				</li>
+				<li class="page-item disabled" th:if="${currentPage - 2 > 1}">
+					<a class="page-link" href="#">...</a>
+				</li>
+				<li class="page-item" th:classappend="${page == currentPage} ? 'active'"
+					th:each="page : ${#numbers.sequence(currentPage > 2 ? currentPage - 2 : 1, currentPage + 2 < totalPages ? currentPage + 2 : totalPages)}">
+					<a
+						th:replace="~{fragments/paging :: paging(${page}, ${pageSize}, ${sortField}, ${sortDir}, ${keyword}, ${page}, 'Page ' + ${page})}"></a>
+				</li>
+				<li class="page-item disabled" th:if="${currentPage + 2 < totalPages}">
+					<a class="page-link" href="#">...</a>
+				</li>
+				<li class="page-item font-weight-bold" th:classappend="${currentPage == totalPages} ? 'disabled'">
+					<a
+						th:replace="~{fragments/paging :: paging(${currentPage + 1}, ${pageSize}, ${sortField}, ${sortDir}, ${keyword}, 'Next', 'Next Page')}"></a>
+				</li>
+				<li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+					<a
+						th:replace="~{fragments/paging :: paging(${totalPages}, ${pageSize}, ${sortField}, ${sortDir}, ${keyword}, '>>', 'Last Page')}"></a>
+				</li>
+			</ul>
+		</nav>
+		<hr>
 	</div>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+
+	<div th:replace="~{fragments/footer :: footer}"></div>
+
+	<script type="text/javascript">
+		$(document).ready(function () {
+			$("#btnClear").on("click", function (e) {
+				e.preventDefault();
+				$("#keyword").val("");
+				window.location = "/";
+			});
+		});
+
+		function changePageSize() {
+			$("#searchForm").submit();
+		}
+	</script>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+		crossorigin="anonymous"></script>
+
+
 </body>
 
 </html>
