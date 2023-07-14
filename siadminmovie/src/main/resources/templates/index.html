@@ -40,7 +40,11 @@
 						<a th:href="@{'/page/' + ${currentPage} + '?sortField=duration&sortDir=' + ${reverseSortDir}}">
 							Duration</a>
 					</th>
-					<th> Actions </th>
+					<th>
+						<a th:href="@{'/page/' + ${currentPage} + '?sortField=genre&sortDir=' + ${reverseSortDir}}">
+							Genre</a>
+					</th>
+					<th class="w-auto"> Actions </th>
 				</tr>
 			</thead>
 			<tbody class="table-group-divider">
@@ -50,6 +54,7 @@
 					<td th:text="${movie.year}"></td>
 					<td th:text="${movie.rating}"></td>
 					<td th:text="${movie.duration}"></td>
+					<td th:text="${movie.genre}"></td>
 					<td> <a th:href="@{/showFormForUpdate/{id}(id=${movie.id})}"
 							class="btn btn-primary btn-sm">Update</a>
 						<a th:attr="data-bs-target=${'#deleteModal'+movie.id}" class="btn btn-danger btn-sm"
@@ -82,7 +87,7 @@
 
 		<div th:if="${totalPages > 1}">
 			<div class="row">
-				<div class="col-3">
+				<div class="col-2">
 					Total Rows: [[${totalItems}]]
 				</div>
 				<div class="col">

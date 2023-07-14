@@ -21,39 +21,43 @@
 				<label for="inputName" class="form-label">Name*</label>
 				<input type="text" th:field="*{name}" class="form-control" id="inputName" required>
 			</div>
-			<div class="col-sm-6">
-				<label for="inputUrl" class="form-label">Url</label>
-				<input type="text" th:field="*{url}" class="form-control" id="inputUrl">
-			</div>
 			<div class="col-sm-2">
 				<label for="inputYear" class="form-label">Year*</label>
 				<input type="number" th:field="*{year}" class="form-control" id="inputYear" required>
 			</div>
 			<div class="col-sm-2">
-				<label for="inputRating" class="form-label">Rating</label>
-				<input type="number" step="any" th:field="*{rating}" class="form-control" id="inputRating">
+				<label for="inputRating" class="form-label">Rating*</label>
+				<input type="number" step="any" th:field="*{rating}" class="form-control" id="inputRating" required>
 			</div>
 			<div class="col-sm-2">
-				<label for="inputDuration" class="form-label">Duration*</label>
-				<input type="text" th:field="*{duration}" class="form-control" id="inputDuration" required>
+				<label for="inputDuration" class="form-label">Duration(min)*</label>
+				<input type="number" th:field="*{duration}" class="form-control" id="inputDuration" required>
+			</div>
+			<div class="col-sm-2">
+				<label for="inputCertificate" class="form-label">Certificate*</label>
+				<input type="text" th:field="*{certificate}" class="form-control" id="inputCertificate" required>
+			</div>
+			<div class="col-sm-2">
+				<label for="inputVotes" class="form-label">Votes*</label>
+				<input type="number" th:field="*{votes}" class="form-control" id="inputVotes" required>
+			</div>
+			<div class="col-sm-2">
+				<label for="inputGross" class="form-label">Gross*</label>
+				<input type="text" th:field="*{gross}" class="form-control" id="inputGross" required>
+			</div>
+			<div class="col-sm-6">
+				<label for="inputImage" class="form-label">Image*</label>
+				<input type="text" th:field="*{image}" class="form-control" id="inputImage" required>
 			</div>
 			<div class="col-sm-3">
 				<label for="inputGenre" class="form-label">Genre*</label>
 				<input type="text" th:field="*{genre}" class="form-control" id="inputGenre" required>
 			</div>
-			<div class="col-sm-3">
-				<label for="inputImage" class="form-label">Image*</label>
-				<input type="text" th:field="*{image}" class="form-control" id="inputImage">
-			</div>
 			<div class="col-sm-4">
 				<label for="inputDirectors" class="form-label">Directors*</label>
 				<input type="text" th:field="*{directors}" class="form-control" id="inputDirectors" required>
 			</div>
-			<div class="col-sm-4">
-				<label for="inputWriters" class="form-label">Writers*</label>
-				<input type="text" th:field="*{writers}" class="form-control" id="inputWriters" required>
-			</div>
-			<div class="col-sm-4">
+			<div class="col-sm-5">
 				<label for="inputStars" class="form-label">Stars*</label>
 				<input type="text" th:field="*{stars}" class="form-control" id="inputStars" required>
 			</div>

@@ -9,9 +9,6 @@ public class Movie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "Url")
-    private String url;
-
     @Column(name = "Name")
     private String name;
 
@@ -20,6 +17,9 @@ public class Movie {
 
     @Column(name = "Rating")
     private double rating;
+
+    @Column(name = "Certificate")
+    private String certificate;
 
     @Column(name = "Duration")
     private String duration;
@@ -30,9 +30,6 @@ public class Movie {
     @Column(name = "Directors")
     private String directors;
 
-    @Column(name = "Writers")
-    private String writers;
-
     @Column(name = "Stars")
     private String stars;
 
@@ -42,20 +39,18 @@ public class Movie {
     @Column(name = "Genre")
     private String genre;
 
+    @Column(name = "Votes")
+    private int votes;
+
+    @Column(name = "Gross")
+    private String gross;
+
     public int getId() {
         return id;
     }
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
     }
 
     public String getName() {
@@ -76,6 +71,30 @@ public class Movie {
 
     public double getRating() {
         return rating;
+    }
+
+    public String getCertificate() {
+        return certificate;
+    }
+
+    public void setCertificate(String certificate) {
+        this.certificate = certificate;
+    }
+
+    public int getVotes() {
+        return votes;
+    }
+
+    public void setVotes(int votes) {
+        this.votes = votes;
+    }
+
+    public String getGross() {
+        return gross;
+    }
+
+    public void setGross(String gross) {
+        this.gross = gross;
     }
 
     public void setRating(double rating) {
@@ -106,14 +125,6 @@ public class Movie {
         this.directors = directors;
     }
 
-    public String getWriters() {
-        return writers;
-    }
-
-    public void setWriters(String writers) {
-        this.writers = writers;
-    }
-
     public String getStars() {
         return stars;
     }
@@ -137,7 +148,4 @@ public class Movie {
     public void setGenre(String genre) {
         this.genre = genre;
     }
-
-    
-
 }
