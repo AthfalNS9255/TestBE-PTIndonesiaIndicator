@@ -15,7 +15,7 @@
 	<div th:replace="~{fragments/header :: header}"></div>
 
 	<div class="container my-2">
-		<h2 class="text-primary">Update Movie</h2>
+		<h2>Update Movie</h2>
 		<hr>
 
 		<form class="row g-3" action="#" th:action="@{/saveMovie}" th:object="${movie}" method="POST">
@@ -72,14 +72,13 @@
 				<textarea class="form-control" th:field="*{plot}" id="inputPlot" rows="2" required></textarea>
 			</div>
 			
-			<div class="col-12">
-				<button type="submit" class="btn btn-primary col-2"> Update Movie</button>
+			<div class="col-10">
+				<button type="submit" class="btn btn-primary col-3"> Update Movie</button>
+				<a href="/" class="btn btn-secondary col-2">Close</a>
 			</div>
 		</form>
 
 		<hr>
-
-		<a href="/"> Back to Movie List</a>
 
 		<div th:replace="~{fragments/footer :: footer}"></div>
 	</div>
