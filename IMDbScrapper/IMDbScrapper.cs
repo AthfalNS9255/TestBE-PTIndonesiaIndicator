@@ -20,7 +20,7 @@ namespace IMDbScrapper
 		int TargetData = 100;
 		int DataKe = 0;
 		string HalamanUtama = "https://www.imdb.com";
-		string UrlTop100 = "chart/top/";
+		string UrlTop100 = "search/title/?groups=top_100&sort=user_rating,desc&view=advanced";
 
 		List<IMDbData> Results;
 
@@ -36,18 +36,8 @@ namespace IMDbScrapper
 				await StartBrowser();
 
 				Step = 3; // get list top 100 movies
-				await GetList();
+				await GetMovies();
 
-				Step = 4; // ambil detail
-				foreach (var data in Results)
-				{
-					if (Program.Cancelled)
-						break;
-
-					//var tunggu = new RandomGenerator().RandomNumber(2, 5);
-					//await Task.Delay(tunggu * 1000);
-					await GetDetail(data);
-				}
 			}
 			catch (Exception ex)
 			{
@@ -59,14 +49,16 @@ namespace IMDbScrapper
 			}
 		}
 
-		private async Task GetList()
+		private async Task GetMovies()
 		{
 			int Step = 0;
 			try
 			{
+				
 				Step = 1; // Set url target
 				string UrlTarget = $"{HalamanUtama}/{UrlTop100}";
-				Console.WriteLine($"Get list {UrlTarget}");
+				
+				Console.WriteLine($"Get Movies started : {UrlTarget}");
 
 				var navigation = new NavigationOptions
 				{
@@ -80,10 +72,11 @@ namespace IMDbScrapper
 				Step = 2; // Load web
 				await page.GoToAsync(UrlTarget, navigation);
 
-				await Task.Delay(10000);
+				//await Task.Delay(10000);
 
+				Paging: 
 				Step = 3; // Pastikan div listings ada
-				var listings = await page.WaitForXPathAsync("//tbody[@class='lister-list']");
+				var listings = await page.WaitForXPathAsync("//div[@class='lister-list']");
 				if (listings == null)
 				{
 					Console.WriteLine($"GetList step {Step} : Element 'listings' tidak ditemukan.");
@@ -91,15 +84,15 @@ namespace IMDbScrapper
 				}
 
 				Step = 4; // Ambil list company
-				var listings_company = await listings.XPathAsync("./tr");
-				if (listings_company.Length == 0)
+				var list_item = await listings.XPathAsync(".//div[@class='lister-item-content']");
+				if (list_item.Length == 0)
 				{
-					Console.WriteLine($"GetList step {Step} : listings_company tidak ditemukan.");
+					Console.WriteLine($"GetList step {Step} : list item tidak ditemukan.");
 					return;
 				}
 
 				Step = 5; // Proses data company
-				foreach (var item in listings_company)
+				foreach (var item in list_item)
 				{
 					//await page.WaitForXPathAsync("//div[contains(@data-testid,'listing-grid')]");
 					if (DataKe < TargetData)
@@ -107,199 +100,155 @@ namespace IMDbScrapper
 						var data = new IMDbData();
 
 						Step = 6; //Url Detail Product
-						var xUrlDetail = await item.XPathAsync("./td[contains(@class, 'title')]/a");
+						var xUrlDetail = await item.XPathAsync("./h3/a");
 						if (xUrlDetail.Length > 0)
 						{
+							await xUrlDetail[0].EvaluateFunctionAsync("e => e.scrollIntoView()");
+							await Task.Delay(100);
+
 							string Pathname = await xUrlDetail[0].EvaluateFunctionAsync<string>("e => e.pathname", xUrlDetail[0]);
 							data.Url = $"{HalamanUtama}{Pathname}";
 						}
 
-						await xUrlDetail[0].EvaluateFunctionAsync("e => e.scrollIntoView()");
-						var tunggu = new RandomGenerator().RandomNumber(2, 5);
-						await Task.Delay(tunggu * 100);
+						Step = 7;
+						var xName = await item.XPathAsync("./h3/a");
+						if (xName.Length > 0)
+						{
+							data.Name = await xName[0].EvaluateFunctionAsync<string>("e => e.innerText", xName[0]);
+						}
 
-						Step = 7; // hasil
-						if (!string.IsNullOrEmpty(data.Url) && 
-							Results.Where(x => x.Url == data.Url).Count() == 0)
+						Step = 8;
+						var xYear = await item.XPathAsync("./h3/span[contains(@class,'year')]");
+						if (xYear.Length > 0)
+						{
+							string Year = await xYear[0].EvaluateFunctionAsync<string>("e => e.innerText", xYear[0]);
+
+							if (Year.ReplaceByEmpty("(", ")").Contains(" "))
+								data.Year = Year.GetAfter(" ").ReplaceByEmpty("(", ")").ToInt32();
+							else
+								data.Year = Year.ReplaceByEmpty("(", ")").ToInt32();
+
+						}
+
+						Step = 9;
+						var xCertificate = await item.XPathAsync("./h3/following-sibling::p[1]/span[@class='certificate']");
+						if (xCertificate.Length > 0)
+						{
+							data.Certificate = await xCertificate[0].EvaluateFunctionAsync<string>("e => e.innerText", xCertificate[0]);
+						}
+
+						Step = 10;
+						var xDuration = await item.XPathAsync("./h3/following-sibling::p[1]/span[@class='runtime']");
+						if (xDuration.Length > 0)
+						{
+							data.Duration = await xDuration[0].EvaluateFunctionAsync<string>("e => e.innerText", xDuration[0]);
+							data.Duration = data.Duration.ReplaceByEmpty("min").Trim();
+						}
+
+						Step = 10;
+						var xGenre = await item.XPathAsync("./h3/following-sibling::p[1]/span[@class='genre']");
+						if (xGenre.Length > 0)
+						{
+							data.Genre = await xGenre[0].EvaluateFunctionAsync<string>("e => e.innerText", xGenre[0]);
+						}
+
+						Step = 11;
+						var xRating = await item.XPathAsync("./div/div[contains(@class,'imdb-rating')]");
+						if (xRating.Length > 0)
+						{
+							data.Rating = await xRating[0].EvaluateFunctionAsync<double>("e => e.getAttribute('data-value')", xRating[0]);
+						}
+
+						Step = 12;
+						if (data.Url.IsNotNullOrEmpty())
+							data.Image = $"{data.Url}mediaviewer/";
+
+						Step = 13;
+						var xPlot = await item.XPathAsync("./h3/following-sibling::p[2]");
+						if (xPlot.Length > 0)
+						{
+							data.Plot = await xPlot[0].EvaluateFunctionAsync<string>("e => e.innerText", xPlot[0]);
+						}
+
+						Step = 14;
+						var xDirectors_Stars = await item.XPathAsync("./h3/following-sibling::p[3]");
+						if (xDirectors_Stars.Length > 0)
+						{
+							string Directors_Stars = await xDirectors_Stars[0].EvaluateFunctionAsync<string>("e => e.innerText", xDirectors_Stars[0]);
+
+							data.Directors = Directors_Stars.Split('|').First().GetAfter(":").Trim();
+							data.Stars = Directors_Stars.Split('|').Last().GetAfter(":").Trim();
+						}
+
+						Step = 15;
+						var xVotes = await item.XPathAsync("./h3/following-sibling::p[4]/span[text()='Votes:']/following-sibling::span");
+						if (xVotes.Length > 0)
+						{
+							data.Votes = await xVotes[0].EvaluateFunctionAsync<int>("e => e.getAttribute('data-value')", xVotes[0]);
+						}
+
+						Step = 16;
+						var xGross = await item.XPathAsync("./h3/following-sibling::p[4]/span[text()='Gross:']/following-sibling::span");
+						if (xGross.Length > 0)
+						{
+							data.Gross = await xGross[0].EvaluateFunctionAsync<string>("e => e.innerText", xGross[0]);
+						}
+
+						Step = 17; // hasil
+						if (!string.IsNullOrEmpty(data.Name) &&
+							Results.Where(x => x.Name == data.Name).Count() == 0)
 						{
 							DataKe += 1;
 							data.DataKe = DataKe;
-							Console.WriteLine($"List Ke {data.DataKe} = {data.Url}\n");
+							Console.OutputEncoding = Encoding.UTF8;
+							Console.WriteLine($"List Ke {data.DataKe} = {data.Name}");
+							Console.WriteLine("");
+							Console.WriteLine($"  - Name        : {data.Name}");
+							Console.WriteLine($"  - Year        : {data.Year}");
+							Console.WriteLine($"  - Certificate : {data.Certificate}");
+							Console.WriteLine($"  - Duration    : {data.Duration} min");
+							Console.WriteLine($"  - Genre       : {data.Genre}");
+							Console.WriteLine($"  - Rating      : {data.Rating} / 10");
+							Console.WriteLine($"  - Image       : {data.Image}");
+							Console.WriteLine($"  - Plot        : {data.Plot}");
+							Console.WriteLine($"  - Directors   : {data.Directors}");
+							Console.WriteLine($"  - Stars       : {data.Stars}");
+							Console.WriteLine($"  - Votes       : {data.Votes}");
+							Console.WriteLine($"  - Gross       : {data.Gross}");
+							Console.WriteLine("");
+
+							SaveToDatabase(data);
 							Results.Add(data);
 
 							if (Program.Cancelled)
 								break;
-							
+
 						}
 					}
 				}
-				Console.WriteLine($"Result : {Results.Count} data");
-				Console.WriteLine(new string('-', 100));
+				Console.WriteLine($"Result : {Results.Count}/{TargetData} data");
 
+				if (Program.Cancelled || Results.Count == TargetData)
+					return;
+
+				Step = 8; // pindah page menggunakan tombol
+				var nextPage = await page.XPathAsync("//a[contains(text(), 'Next')]");
+				if (nextPage.Length > 0)
+				{
+					Console.WriteLine("Go to Next Page!");
+					Console.WriteLine(new string('-', 50));
+					await nextPage[0].ClickAsync();
+					goto Paging;
+				}
+				else
+				{
+					Console.WriteLine("Data Sudah Habis");
+					return;
+				}
 			}
 			catch (Exception ex)
 			{
 				Console.WriteLine($"GetList step {Step} : {ex.Message}");
-			}
-		}
-
-		private async Task GetDetail(IMDbData data)
-		{
-			int Step = 0;
-			try
-			{
-				
-				Console.WriteLine($"Get detail : {data.DataKe}");
-
-				var navigation = new NavigationOptions
-				{
-					Timeout = 0,
-					WaitUntil = new[]
-					{
-						WaitUntilNavigation.Networkidle2
-					}
-				};
-
-				//var ClearCache = await page.Target.CreateCDPSessionAsync();
-				//await ClearCache.SendAsync("Network.clearBrowserCookies");
-				//await ClearCache.SendAsync("Network.clearBrowserCache");
-
-				Step = 1; // Load web
-				await page.GoToAsync(data.Url, navigation);
-
-				Step = 2; // Pastikan element main ada
-				var xCard = await page.WaitForXPathAsync("//main");
-				if (xCard == null)
-				{
-					Console.WriteLine($"- GetDetail step {Step} : Element tidak ditemukan.");
-					return;
-				}
-
-				Step = 3; // untuk ambil Nama film
-				var xName = await xCard.XPathAsync(".//h1");
-				if (xName.Length > 0)
-				{
-					data.Name = await xName[0].EvaluateFunctionAsync<string>("e => e.innerText", xName[0]);
-				}
-
-				Step = 4; // untuk ambil Nama Pemasang
-				var xYear = await xCard.XPathAsync(".//a[contains(@href, 'release')]");
-				if (xYear.Length > 0)
-				{
-					data.Year = await xYear[0].EvaluateFunctionAsync<int>("e => e.innerText", xYear[0]);
-				}
-
-				Step = 5; // ambil rating film
-				var xRating = await xCard.XPathAsync(".//div[contains(@data-testid, 'rating')]/span");
-				if (xRating.Length > 0)
-				{
-					data.Rating = await xRating[0].EvaluateFunctionAsync<double>("e => e.innerText", xRating[0]);
-				}
-
-				Step = 6; // ambil duration film
-				var xDuration = await xCard.XPathAsync(".//h1[contains(@data-testid, 'pageTitle')]/following-sibling::ul/li[3]");
-				if (xDuration.Length > 0)
-				{
-					data.Duration = await xDuration[0].EvaluateFunctionAsync<string>("e => e.innerText", xDuration[0]);
-				}
-
-				Step = 7; // Images film
-				data.Image = $"{data.Url}mediaviewer/";
-
-				Step = 8; // ambil director film
-				var xLDirectors = await xCard.XPathAsync("//*[contains(text(), 'Director')]/following-sibling::div");
-				if (xLDirectors.Length > 0)
-				{
-					List<string> Directors = new List<string>();
-					var xDirectors = await xLDirectors[0].XPathAsync(".//a");
-
-					foreach (var item in xDirectors)
-					{
-						string Director = await item.EvaluateFunctionAsync<string>("e => e.innerText", item);
-						Directors.Add(Director);
-					}
-
-					data.Directors = string.Join(", ", Directors);
-				}
-
-				Step = 9; // ambil writers film
-				var xLWriters = await xCard.XPathAsync(".//*[contains(text(), 'Writer')]/following-sibling::div");
-				if (xLWriters.Length > 0)
-				{
-					List<string> Writers = new List<string>();
-					var xWriters = await xLWriters[0].XPathAsync(".//a");
-					
-					foreach (var item in xWriters)
-					{
-						string Writer = await item.EvaluateFunctionAsync<string>("e => e.innerText", item);
-						Writers.Add(Writer);
-					}
-
-					data.Writers = string.Join(", ", Writers);
-				}
-
-				Step = 10; // ambil stars film
-				var xLStars = await xCard.XPathAsync(".//*[contains(text(), 'Star')]/following-sibling::div");
-				if (xLStars.Length > 0)
-				{
-					List<string> Stars = new List<string>();
-					var xStars = await xLStars[0].XPathAsync(".//a");
-
-					foreach (var item in xStars)
-					{
-						string Star = await item.EvaluateFunctionAsync<string>("e => e.innerText", item);
-						Stars.Add(Star);
-					}
-
-					data.Stars = string.Join(", ", Stars);
-				}
-
-				Step = 11; // ambil plot film
-				var xPlot = await xCard.XPathAsync(".//p[@data-testid='plot']");
-				if (xPlot.Length > 0)
-				{
-					data.Plot = await xPlot[0].EvaluateFunctionAsync<string>("e => e.innerText", xPlot[0]);
-				}
-
-				Step = 12; // ambil Genre film
-				var xGenres = await xCard.XPathAsync(".//div[@data-testid='genres']//a");
-				if (xGenres.Length > 0)
-				{
-					List<string> Genres = new List<string>();
-					
-					foreach (var item in xGenres)
-					{
-						string Genre = await item.EvaluateFunctionAsync<string>("e => e.innerText", item);
-						Genres.Add(Genre);
-					}
-
-					data.Genre = string.Join(", ", Genres);
-				}
-
-				Step = 16;
-				if (!string.IsNullOrEmpty(data.Name))
-				{
-					Console.OutputEncoding = Encoding.UTF8;
-					Console.WriteLine($"  - URL        : {data.Url}");
-					Console.WriteLine($"  - Name       : {data.Name}");
-					Console.WriteLine($"  - Year       : {data.Year}");
-					Console.WriteLine($"  - Genre      : {data.Genre}");
-					Console.WriteLine($"  - Plot       : {data.Plot}");
-					Console.WriteLine($"  - Rating     : {data.Rating} / 10");
-					Console.WriteLine($"  - Duration   : {data.Duration}");
-					Console.WriteLine($"  - Image      : {data.Image}");
-					Console.WriteLine($"  - Directors  : {data.Directors}");
-					Console.WriteLine($"  - Writers    : {data.Writers}");
-					Console.WriteLine($"  - Stars      : {data.Stars}");
-
-					SaveToDatabase(data);
-				}
-
-				
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"Error GetDetailPemasang Step {Step} : {ex.Message}");
 			}
 		}
 
@@ -311,24 +260,25 @@ namespace IMDbScrapper
 				Step = 1;
 				MySqlConnection connection = new MySqlConnection("Server=localhost; Database=imdbscrapper; Uid=root; Pwd=root;");
 				MySqlCommand insertCommand = new MySqlCommand("Insert into movie " +
-					"(Url, Name, Year, Rating, Duration, Image, Directors, Writers, Stars, Plot, Genre) values " +
-					"(@Url, @Name, @Year, @Rating, @Duration, @Image, @Directors, @Writers, @Stars, @Plot, @Genre)", connection);
+					"(Name, Year, Certificate, Duration, Genre, Rating, Image, Plot, Directors, Stars, Votes, Gross) values " +
+					"(@Name, @Year, @Certificate, @Duration, @Genre, @Rating, @Image, @Plot, @Directors, @Stars, @Votes, @Gross)", connection);
 
 				Step = 2;
 				connection.Open();
 
 				Step = 3;
-				insertCommand.Parameters.AddWithValue("@Url", data.Url);
 				insertCommand.Parameters.AddWithValue("@Name", data.Name);
 				insertCommand.Parameters.AddWithValue("@Year", data.Year);
-				insertCommand.Parameters.AddWithValue("@Rating", data.Rating);
+				insertCommand.Parameters.AddWithValue("@Certificate", data.Certificate);
 				insertCommand.Parameters.AddWithValue("@Duration", data.Duration);
-				insertCommand.Parameters.AddWithValue("@Image", data.Image);
-				insertCommand.Parameters.AddWithValue("@Directors", data.Directors);
-				insertCommand.Parameters.AddWithValue("@Writers", data.Writers);
-				insertCommand.Parameters.AddWithValue("@Stars", data.Stars);
-				insertCommand.Parameters.AddWithValue("@Plot", data.Plot);
 				insertCommand.Parameters.AddWithValue("@Genre", data.Genre);
+				insertCommand.Parameters.AddWithValue("@Rating", data.Rating);
+				insertCommand.Parameters.AddWithValue("@Image", data.Image);
+				insertCommand.Parameters.AddWithValue("@Plot", data.Plot);
+				insertCommand.Parameters.AddWithValue("@Directors", data.Directors);
+				insertCommand.Parameters.AddWithValue("@Stars", data.Stars);
+				insertCommand.Parameters.AddWithValue("@Votes", data.Votes);
+				insertCommand.Parameters.AddWithValue("@Gross", data.Gross);
 
 				Step = 3;
 				if (insertCommand.ExecuteNonQuery() > 0)
