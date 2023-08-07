@@ -9,7 +9,7 @@
             <div class="collapse navbar-collapse" id="topNavbar">
                 <div class="navbar-nav">
                     <a class="nav-link" href="/" 
-                        th:classappend="${#ctx.springRequestContext.requestUri} == '/' ? 'active'">Home</a>
+                        th:classappend="${#ctx.springRequestContext.requestUri} != '/showNewMovieForm' ? 'active'">Home</a>
                     <a class="nav-link" th:href="@{/showNewMovieForm}" 
                         th:classappend="${#ctx.springRequestContext.requestUri} == '/showNewMovieForm' ? 'active'">Add</a>
                 </div>
